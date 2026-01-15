@@ -1,0 +1,72 @@
+[
+  {
+    "target": "http://testphp.vulnweb.com/admin",
+    "statusCode": 200,
+    "headers": {
+      "Server": "nginx/1.19.0",
+      "Date": "Thu, 15 Jan 2026 03:21:09 GMT",
+      "Transfer-Encoding": "chunked",
+      "Connection": "keep-alive",
+      "Content-Type": "text/html"
+    },
+    "responseHash": "CEFD23B3B3D4D2F06FABC339008A0F5C3A757D8B152B807D737E6E35CF8231F8",
+    "latencyMS": 1467,
+    "message": "OK"
+  },
+  {
+    "target": "http://testphp.vulnweb.com/login",
+    "statusCode": 404,
+    "headers": {
+      "Server": "nginx/1.19.0",
+      "Date": "Thu, 15 Jan 2026 03:21:09 GMT",
+      "Connection": "keep-alive",
+      "Content-Type": "text/html",
+      "Content-Length": "153"
+    },
+    "responseHash": "36C62D860CBD93A96655370C11D43992BFA401CA2C8B78CFA18D91C549FD2F85",
+    "latencyMS": 1151,
+    "message": "Not Found"
+  },
+  {
+    "target": "http://testphp.vulnweb.com/logout",
+    "statusCode": 404,
+    "headers": {
+      "Server": "nginx/1.19.0",
+      "Date": "Thu, 15 Jan 2026 03:21:09 GMT",
+      "Connection": "keep-alive",
+      "Content-Type": "text/html",
+      "Content-Length": "153"
+    },
+    "responseHash": "36C62D860CBD93A96655370C11D43992BFA401CA2C8B78CFA18D91C549FD2F85",
+    "latencyMS": 1150,
+    "message": "Not Found"
+  },
+  {
+    "target": "http://testphp.vulnweb.com/profile",
+    "statusCode": 404,
+    "headers": {
+      "Server": "nginx/1.19.0",
+      "Date": "Thu, 15 Jan 2026 03:21:09 GMT",
+      "Connection": "keep-alive",
+      "Content-Type": "text/html",
+      "Content-Length": "153"
+    },
+    "responseHash": "36C62D860CBD93A96655370C11D43992BFA401CA2C8B78CFA18D91C549FD2F85",
+    "latencyMS": 1150,
+    "message": "Not Found"
+  },
+  {
+    "target": "http://testphp.vulnweb.com/dashboard",
+    "statusCode": 404,
+    "headers": {
+      "Server": "nginx/1.19.0",
+      "Date": "Thu, 15 Jan 2026 03:21:09 GMT",
+      "Connection": "keep-alive",
+      "Content-Type": "text/html",
+      "Content-Length": "153"
+    },
+    "responseHash": "36C62D860CBD93A96655370C11D43992BFA401CA2C8B78CFA18D91C549FD2F85",
+    "latencyMS": 1150,
+    "message": "Not Found"
+  }
+]
