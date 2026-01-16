@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.IO;
 using ScanModels.Waf_Scanner;
-using System.Net;
 using System.Reflection.Metadata;
 namespace ScanModels.WafAnalyser
 {
@@ -16,15 +15,18 @@ namespace ScanModels.WafAnalyser
         public async Task<List<ScanOutput>> LoadFile()
         {
             string jsonString = await File.ReadAllTextAsync(JsonFilePath);
-            return JsonSerializer.Deserialize<List<ScanOutput>>(jsonString) ?? new List<ScanOutput>();
+            return JsonSerializer.Deserialize<List<ScanOutput>>(
+     jsonString,
+     new JsonSerializerOptions
+     {
+         PropertyNameCaseInsensitive = true
+     }
+ ) ?? new List<ScanOutput>();
 
         }
-
-        public List<double> SpikedLatency = new();
-        public List<double> IncreasedLatency = new();
-        public List<double> DecreasedLatency = new();
-        public void LatencyAnalysis(List<double> latencyList)
+        public List<double> LatencySpikeAnalysis(List<double> latencyList)
         {
+            List<double> SpikedLatency = new();
             double Average = latencyList.Average();
             double variance = latencyList.Select(x => Math.Pow(x - Average, 2)).Average();
             double stDev = Math.Sqrt(variance);
@@ -36,24 +38,12 @@ namespace ScanModels.WafAnalyser
                     SpikedLatency.Add(lat);
                 }
             }
-            for (int i = 1; i < latencyList.Count; i++)
-            {
-                var lat = latencyList[i];
-                var prevLat = latencyList[i - 1];
-
-                if (lat > prevLat)
-                    IncreasedLatency.Add(lat);
-                else if (lat < prevLat)
-                    DecreasedLatency.Add(lat);
-            }
-
+            return SpikedLatency;
         }
         public async Task<WafAnalyserOutput> AnayseOutput()
         {
-            IncreasedLatency.Clear();
-            DecreasedLatency.Clear();
-            SpikedLatency.Clear();
-
+            List<double> IncreasedLatency = new();
+            List<double> DecreasedLatency = new();
             List<ScanOutput> loadedFile = await LoadFile();
             var StatusCodeList = loadedFile.Select(x => x.StatusCode).ToList();
             List<int> DetectedCodes = new();
@@ -81,13 +71,24 @@ namespace ScanModels.WafAnalyser
 
             // Extraction Part 
             var LatencyList = loadedFile.Select(x => x.LatencyMS).ToList();
-            LatencyAnalysis(latencyList: LatencyList);
+            var SpikedLatency = LatencySpikeAnalysis(LatencyList);
+            for (int i = 0; i < LatencyList.Count - 1; i++)
+            {
+                if (LatencyList[i + 1] > LatencyList[i])
+                {
+                    IncreasedLatency.Add(LatencyList[i + 1]);
+                }
+                else if (LatencyList[i + 1] < LatencyList[i])
+                {
+                    DecreasedLatency.Add(LatencyList[i + 1]);
+                }
+            }
             WafAnalyserOutput outputData = new WafAnalyserOutput();
             var TargetList = loadedFile.Select(x => x.Target).ToList();
             var HashResponseList = loadedFile.Select(x => x.ResponseHash).ToList();
             var MessageList = loadedFile.Select(x => x.Message).ToList();
             var Headers = loadedFile.Where(x => x.Headers != null).Select(x => x.Headers!).ToList();
-            outputData.listOfTarget = TargetList;
+            outputData.ListOfTarget = TargetList;
             outputData.StatusCodeList = StatusCodeList;
             outputData.LatencyList = LatencyList;
             outputData.LatencyInreasing = IncreasedLatency;
@@ -105,7 +106,7 @@ namespace ScanModels.WafAnalyser
 
     public class WafAnalyserOutput
     {
-        public List<string> listOfTarget { set; get; } = new();
+        public List<string> ListOfTarget { set; get; } = new();
         public List<double> LatencyList { set; get; } = new();
         public List<double> SpikedLatency { set; get; } = new();
         public List<double> LatencyInreasing { set; get; } = new();
