@@ -6,29 +6,31 @@ using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using System.Net.Http.Headers;
+using ScanModels.WarmupModel;
 
 namespace ScanModels.Waf_Scanner
 {
     public class WafScan
     {
+        public WarmupScan warmupScan {init; get;}
         public string[] Args { init; get; }
         public string Target = string.Empty;
         public SemaphoreSlim _concurrency;
         public int Timeout;
         public string WordlistPath = string.Empty;
         public string JsonFilePath = string.Empty;
+        public int Concurrency;
         public HttpClient _client;
         public CLIMainEngine cliEngine;
         public WafScan(string[] args)
         {
+            warmupScan = new WarmupScan(args);
             Args = args;
             cliEngine = new CLIMainEngine().ProcessCLiArgs(args: Args);
             Target = cliEngine.Target;
-            Timeout = cliEngine.Timeout;
             WordlistPath = cliEngine.WordlistPath;
             JsonFilePath = cliEngine.JsonFilePath;
-            _concurrency = new SemaphoreSlim(cliEngine.Concurrency);
+            _concurrency = new SemaphoreSlim(Concurrency);
             _client = new HttpClient();
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("ReconSage/1.0");
         }
@@ -89,6 +91,12 @@ namespace ScanModels.Waf_Scanner
         }
         public async Task<List<ScanOutput>> MainScan()
         {
+            Console.WriteLine($"[+] Warmup Scan Starts......");
+            WarmUpScanOutput scanOutput = await warmupScan.MainScan();
+            Concurrency = scanOutput.Concurrency;
+            Timeout = scanOutput.Timeout;
+            Console.WriteLine($"[+] Warmup Scan Completed. Using Concurrency: {Concurrency}, Timeout: {Timeout}s");
+            Console.WriteLine("[+] Starting WAF Detection Scan......");
             string[] wordlist = ProcessWordlist();
             List<Task<ScanOutput>> scanOutputs = new();
             foreach(var words in wordlist)
