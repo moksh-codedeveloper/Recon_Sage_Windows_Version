@@ -1,7 +1,6 @@
 using System.IO;
 using System.Text.Json;
 using ScanModels.DirBruteScan;
-using ScanModels.WarmupModel;
 using ScanModels.RateLimitModule;
 using ScanModels.Waf_Scanner;
 using ScanModels.WafAnalyser;
@@ -30,12 +29,6 @@ namespace AppEngine
             await DataExporter.ExportToJsonAsync(results, "DirScan");
             Console.WriteLine("[+]The scan is complete and results are written in the Json file");
         }
-        public async Task WarmScan()
-        {
-            WarmupScan warmupScan = new WarmupScan(Args: args);
-            var results = await warmupScan.MainScan();
-            await DataExporter.ExportToJsonAsync(results, warmupScan.JsonFilePath);
-        }
         public async Task RateLimitScan()
         {
             RateLimitModule rateLimit = new RateLimitModule(args: args);
@@ -61,9 +54,6 @@ namespace AppEngine
             {
                 case "--dir":
                     await DirScan();
-                    break;
-                case "--warmup":
-                    await WarmScan();
                     break;
                 case "--waf":
                     await WafScan();

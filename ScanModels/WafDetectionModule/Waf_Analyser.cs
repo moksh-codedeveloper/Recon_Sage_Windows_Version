@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.IO;
 using ScanModels.Waf_Scanner;
 using System.Reflection.Metadata;
+
 namespace ScanModels.WafAnalyser
 {
     public class WafAnalyser

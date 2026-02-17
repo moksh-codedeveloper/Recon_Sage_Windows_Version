@@ -6,13 +6,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using ScanModels.WarmupModel;
 
 namespace ScanModels.Waf_Scanner
 {
     public class WafScan
     {
-        public WarmupScan warmupScan {init; get;}
         public string[] Args { init; get; }
         public string Target = string.Empty;
         public SemaphoreSlim _concurrency;
@@ -24,7 +22,6 @@ namespace ScanModels.Waf_Scanner
         public CLIMainEngine cliEngine;
         public WafScan(string[] args)
         {
-            warmupScan = new WarmupScan(args);
             Args = args;
             cliEngine = new CLIMainEngine().ProcessCLiArgs(args: Args);
             Target = cliEngine.Target;
@@ -91,11 +88,6 @@ namespace ScanModels.Waf_Scanner
         }
         public async Task<List<ScanOutput>> MainScan()
         {
-            Console.WriteLine($"[+] Warmup Scan Starts......");
-            WarmUpScanOutput scanOutput = await warmupScan.MainScan();
-            Concurrency = scanOutput.Concurrency;
-            Timeout = scanOutput.Timeout;
-            Console.WriteLine($"[+] Warmup Scan Completed. Using Concurrency: {Concurrency}, Timeout: {Timeout}s");
             Console.WriteLine("[+] Starting WAF Detection Scan......");
             string[] wordlist = ProcessWordlist();
             List<Task<ScanOutput>> scanOutputs = new();
