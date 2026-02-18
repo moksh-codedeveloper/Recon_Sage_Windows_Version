@@ -20,15 +20,16 @@ namespace ScanInterface
             _concurrency = new SemaphoreSlim(Concurrency);
         }
 
-        public async Task<ScanOutput> SendAsync()
+        public async Task<ScanOutput> SendAsync(string domain)
         {
+            string subDomain = Target + domain;
             ScanOutput scanOutputModel = new ScanOutput();
             scanOutputModel.Target = Target;
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(Timeout));
             var sw = Stopwatch.StartNew();
             try
             {
-                var result = await _client.GetAsync(Target, cts.Token);
+                var result = await _client.GetAsync(subDomain, cts.Token);
                 sw.Stop();
                 var Latency = sw.ElapsedMilliseconds;
                 var Message = result.ReasonPhrase;
@@ -41,6 +42,10 @@ namespace ScanInterface
             catch (Exception ex)
             {
                 Console.WriteLine("This is the Exception which keeps coming..... :- ", ex.Message);
+            }
+            finally
+            {
+                _concurrency.Release();
             }
             return scanOutputModel;
         }

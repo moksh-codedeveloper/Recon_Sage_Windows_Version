@@ -4,6 +4,6 @@ namespace Interface.Network
 {
     public interface INetwork
     {
-        Task<ScanOutput> SendAsync();
+        Task<ScanOutput> SendAsync(string Domain);
     }
 }
