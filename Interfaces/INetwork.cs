@@ -1,7 +1,9 @@
+using ScanOutputModel;
+
 namespace Interface.Network
 {
     public interface INetwork
     {
-        Task<List<Object>> SendAsync();
+        Task<ScanOutput> SendAsync();
     }
 }
