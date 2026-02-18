@@ -1,6 +1,4 @@
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using System.IO.Pipelines;
 using Interface.Network;
 using ScanOutputModel;
 
