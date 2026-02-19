@@ -1,4 +1,7 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Net;
+using System.Runtime.CompilerServices;
 using Interface.Network;
 using ScanOutputModel;
 
@@ -24,7 +27,7 @@ namespace ScanInterface
         {
             string subDomain = Target + domain;
             ScanOutput scanOutputModel = new ScanOutput();
-            scanOutputModel.Target = Target;
+            scanOutputModel.Target = subDomain;
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(Timeout));
             var sw = Stopwatch.StartNew();
             try
@@ -42,12 +45,51 @@ namespace ScanInterface
             catch (Exception ex)
             {
                 Console.WriteLine("This is the Exception which keeps coming..... :- ", ex.Message);
+                scanOutputModel.Message = ex.Message;
             }
             finally
             {
                 _concurrency.Release();
             }
             return scanOutputModel;
+        }
+    }
+    public class TorNetwork:INetwork
+    {
+        public string _target{set;get;} = string.Empty;
+        public int _timeout{set;get;}
+        private readonly HttpClient _client;
+        public TorNetwork(string target, int timeout)
+        {
+            _target = target;
+            _timeout = timeout;
+            var handler = new SocketsHttpHandler
+            {
+              Proxy = new WebProxy("socks5://127.0.0.1:9050"),
+              UseProxy = true  
+            };
+            _client = new HttpClient(handler);
+        }
+        public async Task<ScanOutput> SendAsync(string domain)
+        {
+            ScanOutput scanOutput = new ScanOutput();
+            string fullUrl = _target + domain;
+            scanOutput.Target = fullUrl;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeout));
+            var sw  = Stopwatch.StartNew();
+            try
+            {
+                var result = await _client.GetAsync(fullUrl, cts.Token);
+                scanOutput.StatusCode = (int)result.StatusCode;
+                scanOutput.Message = result.ReasonPhrase;
+                scanOutput.Headers = result.Headers.ToDictionary(h => h.Key, h => string.Join(",", h.Value));
+                scanOutput.LatencyMS = sw.ElapsedMilliseconds;
+            }
+            catch (Exception ex)
+            {
+                scanOutput.Message = ex.Message;
+            }
+            return scanOutput;
         }
     }
 }
