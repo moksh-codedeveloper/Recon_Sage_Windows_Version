@@ -10,17 +10,13 @@ namespace ScannerCore
         public int Timeout { set; get; }
         public int Concurrency { set; get; }
         public string WordlistPath { set; get; } = string.Empty;
-        public string JsonPath { set; get; } = string.Empty;
-        public string JsonFileName { set; get; } = string.Empty;
 
-        public Scanner(string _target, int _concurrency, int _timeout, string _wordlistpath, string _jsonFileName, string _jsonFilePath)
+        public Scanner(string _target, int _concurrency, int _timeout, string _wordlistpath)
         {
             Target = _target;
             Concurrency = _concurrency;
             Timeout = _timeout;
             WordlistPath = _wordlistpath;
-            JsonPath = _jsonFilePath;
-            JsonFileName = _jsonFileName;
         }
 
         public async Task<string[]> wordlistProcess()

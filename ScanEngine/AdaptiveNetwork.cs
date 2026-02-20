@@ -15,9 +15,11 @@ namespace Adapter
 
         public async Task<ScanOutput> SendAsync(string domain)
         {
+            Console.WriteLine("[+]Normal scanning started.....");
             var result = await _normal.SendAsync(domain);
             if (IsBlocked(result))
             {
+                Console.WriteLine("[+]Tor scanning activated.......");
                 return await _tor.SendAsync(domain);
             }
             return result;
