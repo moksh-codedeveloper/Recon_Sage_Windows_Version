@@ -3,6 +3,7 @@ using ScanModels.CLIVersion;
 using ScanOutputModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ResoParser;
 
 namespace AppEngine
 {
@@ -16,13 +17,45 @@ namespace AppEngine
 
         public async Task RunScan(string[] args)
         {
-            var cliEngine = new CLIMainEngine().ProcessCLiArgs(args: args);
-            Console.WriteLine("Arguements processing done now starting the scan.....");
-            Target = cliEngine.Target;
-            Concurrency = cliEngine.Concurrency;
-            Timeout = cliEngine.Timeout;
-            JsonFilePath = cliEngine.JsonFilePath;
-            WordlistPath = cliEngine.WordlistPath;
+            // var cliEngine = new CLIMainEngine().ProcessCLiArgs(args: args);
+            // Console.WriteLine("Arguements processing done now starting the scan.....");
+            // Target = cliEngine.Target;
+            // Concurrency = cliEngine.Concurrency;
+            // Timeout = cliEngine.Timeout;
+            // JsonFilePath = cliEngine.JsonFilePath;
+            // WordlistPath = cliEngine.WordlistPath;
+            if (args.Length < 2)
+            {
+                throw new Exception("Not args have been passed  you should pass a proper args and you should read docs for that...");
+            }
+            switch (args[0])
+            {
+                case "--config-file":
+                    string filePath = args[1];
+                    if (!filePath.EndsWith(".rso", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception("The file you passed is not acceptable please use the rso not any other one");
+                    }
+                    Parser parser = new Parser(filePath);
+                    Dictionary<string, string> data = parser.Parse();
+                    var parserToDict = parser.ParseDictToObject(data);
+                    Target = parserToDict.Target;
+                    Concurrency = parserToDict.Concurrency;
+                    Timeout = parserToDict.Timeout;
+                    JsonFilePath = parserToDict.JsonFilePath;
+                    WordlistPath = parserToDict.WordlistPath;
+                    break;
+                case "--args":
+                    var cliEngine = new CLIMainEngine().ProcessCLiArgs(args);
+                    Target = cliEngine.Target;
+                    Concurrency = cliEngine.Concurrency;
+                    Timeout = cliEngine.Timeout;
+                    JsonFilePath = cliEngine.JsonFilePath;
+                    WordlistPath = cliEngine.WordlistPath;
+                    break;
+                default:
+                    throw new Exception("Unknown argument type. Use --config-file or --args.");
+            }
             Scanner scanner = new Scanner(Target, Concurrency, Timeout, WordlistPath);
             MainScanOutput mainScan = await scanner.ExecuteScan();
             PrintToConsole(mainScan);
