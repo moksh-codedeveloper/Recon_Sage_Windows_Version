@@ -35,7 +35,11 @@ namespace ResoParser
                 if (!data.ContainsKey(key))
                     throw new Exception($"Missing required key: {key}");
             }
-
+            // TARGET validation
+            if(!Uri.TryCreate(data["target"], UriKind.Absolute, out Uri? uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new Exception("Target has broken http url or  it is not Http Url please pass a proper url of https or http");
+            }
             // NUMBER VALIDATION
             if (!int.TryParse(data["concurrency"], out int concurrency) || concurrency <= 0)
                 throw new Exception("Invalid concurrency value.");
