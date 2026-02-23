@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Interface.Network;
 using ScanOutputModel;
 
@@ -27,9 +28,23 @@ namespace Adapter
 
         private bool IsBlocked(ScanOutput result)
         {
-            return result.StatusCode == 403 ||
-                   result.StatusCode == 429 ||
-                   result.StatusCode == 503;
+            bool isBlocked = true;
+            List<int> blockedCodes = new List<int>{
+                401,
+                403,
+                406,
+                429,
+                451,
+                503
+            };
+            foreach(var code in blockedCodes)
+            {
+                if(code != result.StatusCode)
+                {
+                    isBlocked = false;
+                }
+            }
+            return isBlocked;
         }
     }
 }
