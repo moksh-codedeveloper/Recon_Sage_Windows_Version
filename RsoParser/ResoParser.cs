@@ -29,7 +29,7 @@ namespace ResoParser
             }
 
             // REQUIRED KEYS CHECK
-            string[] requiredKeys = { "target", "concurrency", "timeout", "json_file_path", "wordlist_path" };
+            string[] requiredKeys = { "target", "concurrency", "timeout", "json_file_path", "wordlist_path", "tor_scan", "normal_scan", "adaptive_switch"};
 
             foreach (var key in requiredKeys)
             {
@@ -51,8 +51,8 @@ namespace ResoParser
                 throw new Exception("ERROR in parsing the values of tor_scan in bool please pass true or false for if you want it or not");
             if(!bool.TryParse(data["normal_scan"], out bool normal_scan))
                 throw new Exception("ERROR in parsing the values of normal_scan in bool please pass true or false for if you want it or not");
-            if(!bool.TryParse(data["tor_scan"], out bool adaptive_switch))
-                throw new Exception("ERROR in parsing the values normal_scan in bool please pass true or false for if you want it or not");
+            if(!bool.TryParse(data["adaptive_switch"], out bool adaptive_switch))
+                throw new Exception("ERROR in parsing the values adaptive_switch in bool please pass true or false for if you want it or not");
 
             // FILE EXTENSION CHECKS
             if (!data["wordlist_path"].EndsWith(".txt", StringComparison.OrdinalIgnoreCase))

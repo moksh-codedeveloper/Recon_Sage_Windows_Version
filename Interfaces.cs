@@ -11,14 +11,13 @@ namespace ScanInterface
         public int Concurrency { set; get; }
         public int Timeout { set; get; }
         private readonly HttpClient _client;
-        private readonly SemaphoreSlim _concurrency;
         public NormalScan(string target, int concurrency, int timeout)
         {
             Target = target;
             Concurrency = concurrency;
             Timeout = timeout;
             _client = new HttpClient();
-            _concurrency = new SemaphoreSlim(Concurrency);
+            Concurrency = concurrency;
         }
 
         public async Task<ScanOutput> SendAsync(string domain)
@@ -44,10 +43,6 @@ namespace ScanInterface
             {
                 Console.WriteLine("This is the Exception which keeps coming..... :- ", ex.Message);
                 scanOutputModel.Message = ex.Message;
-            }
-            finally
-            {
-                _concurrency.Release();
             }
             return scanOutputModel;
         }
