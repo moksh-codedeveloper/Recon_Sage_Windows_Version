@@ -1,3 +1,5 @@
+using System.Net.Sockets;
+
 namespace TorConfigParser
 {
     public class Parser
@@ -7,7 +9,8 @@ namespace TorConfigParser
         {
             _filepath = filepath;
         }
-
+        public string _host{set;get;} = string.Empty;
+        public int _port{set;get;}
         public Dictionary<string, string> Parse()
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
@@ -44,6 +47,33 @@ namespace TorConfigParser
                 throw new Exception("Please pass a valid password");
             }
             return data;
+        }
+        public async Task Rotate()
+        {
+            Dictionary<string, string> parsedData = Parse();
+            string _host = parsedData["host"];
+            int _port = int.Parse(parsedData["port"]);
+            string password = parsedData["password"];
+            using TcpClient client = new TcpClient();
+            await client.ConnectAsync(_host, _port);
+            using NetworkStream stream = client.GetStream();
+            using StreamReader reader = new StreamReader(stream);
+            using StreamWriter writer = new StreamWriter(stream){
+                AutoFlush = true,
+                NewLine = "\r\n"
+            };
+            await writer.WriteLineAsync($"AUTHENTICATE {password}");
+            string authResponse = await reader.ReadLineAsync();
+            if(authResponse == null || !authResponse.StartsWith("250"))
+            {
+                throw new Exception("Auth error : the password authentication failed with the wrong password");
+            }
+            await writer.WriteLineAsync("SIGNAL NEWNYM");
+            string newNymResponse = await reader.ReadLineAsync();
+            if(newNymResponse == null || newNymResponse.StartsWith("250"))
+            {
+                throw new Exception($"NEWNYM failed : {newNymResponse}");
+            }
         }
     }
 }
