@@ -44,7 +44,7 @@ namespace ResoParser
             // NUMBER VALIDATION
             if (!int.TryParse(data["concurrency"], out int concurrency) || concurrency <= 0)
                 throw new Exception("Invalid concurrency value.");
-
+    
             if (!int.TryParse(data["timeout"], out int timeout) || timeout <= 0)
                 throw new Exception("Invalid timeout value.");
             if(!bool.TryParse(data["tor_scan"], out bool tor_scan))
