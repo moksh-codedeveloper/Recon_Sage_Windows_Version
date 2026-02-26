@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using RfoModel;
 
 namespace TorConfigParser
 {
@@ -10,15 +11,7 @@ namespace TorConfigParser
         {
             _filepath = filepath;
         }
-        public IPAddress _host { set; get; }
-        public int _port { set; get; }
-        public string password {set;get;} = string.Empty;
-        public string Target {set;get;} = string.Empty;
-        public int Timeout{set;get;}
-        public string JsonFilePath{set;get;} = string.Empty;
-        public string WordlistPath{set;get;} = string.Empty;
-
-        public Dictionary<string, string> Parse()
+        private Dictionary<string, string> Parse()
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             if (_filepath == "config.rfo")
@@ -64,36 +57,18 @@ namespace TorConfigParser
                 throw new Exception("Output file must be .json.");
             return data;
         }
-        public async Task Rotate()
+        public RfoParsedModel DictToObject()
         {
             Dictionary<string, string> parsedData = Parse();
-            _host = IPAddress.Parse(parsedData["host"]);
-            _port = int.Parse(parsedData["port"]);
-            password = parsedData["password"];
-
-            using TcpClient client = new TcpClient();
-
-            await client.ConnectAsync(_host, _port);
-
-            using NetworkStream stream = client.GetStream();
-            using StreamReader reader = new StreamReader(stream);
-            using StreamWriter writer = new StreamWriter(stream)
-            {
-                AutoFlush = true,
-                NewLine = "\r\n"
-            };
-            await writer.WriteLineAsync($"AUTHENTICATE {password}");
-            string authResponse = await reader.ReadLineAsync();
-            if (authResponse == null || !authResponse.StartsWith("250"))
-            {
-                throw new Exception("Auth error : the password authentication failed with the wrong password");
-            }
-            await writer.WriteLineAsync("SIGNAL NEWNYM");
-            string newNymResponse = await reader.ReadLineAsync();
-            if (newNymResponse == null || newNymResponse.StartsWith("250"))
-            {
-                throw new Exception($"NEWNYM failed : {newNymResponse}");
-            }
+            RfoParsedModel parsedModel = new RfoParsedModel();
+            parsedModel.Target = parsedData["target"];
+            parsedModel.Timeout = int.Parse(parsedData["timeout"]);
+            parsedModel.JsonFilePath = parsedData["json_file_path"];
+            parsedModel.WordlistPath = parsedData["wordlist_path"];
+            parsedModel.Port = int.Parse(parsedData["port"]);
+            parsedModel.host = IPAddress.Parse(parsedData["host"]);
+            parsedModel.Password = parsedData["password"];
+            return parsedModel;
         }
     }
 }
