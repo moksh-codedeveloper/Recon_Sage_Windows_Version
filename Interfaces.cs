@@ -47,42 +47,4 @@ namespace ScanInterface
             return scanOutputModel;
         }
     }
-    public class TorNetwork:INetwork
-    {
-        public string _target{set;get;} = string.Empty;
-        public int _timeout{set;get;}
-        private readonly HttpClient _client;
-        public TorNetwork(string target, int timeout)
-        {
-            _target = target;
-            _timeout = timeout;
-            var handler = new SocketsHttpHandler
-            {
-              Proxy = new WebProxy("socks5://127.0.0.1:9050"),
-              UseProxy = true  
-            };
-            _client = new HttpClient(handler);
-        }
-        public async Task<ScanOutput> SendAsync(string domain)
-        {
-            ScanOutput scanOutput = new ScanOutput();
-            string fullUrl = _target + domain;
-            scanOutput.Target = fullUrl;
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeout));
-            var sw  = Stopwatch.StartNew();
-            try
-            {
-                var result = await _client.GetAsync(fullUrl, cts.Token);
-                scanOutput.StatusCode = (int)result.StatusCode;
-                scanOutput.Message = result.ReasonPhrase;
-                scanOutput.Headers = result.Headers.ToDictionary(h => h.Key, h => string.Join(",", h.Value));
-                scanOutput.LatencyMS = sw.ElapsedMilliseconds;
-            }
-            catch (Exception ex)
-            {
-                scanOutput.Message = ex.Message;
-            }
-            return scanOutput;
-        }
-    }
 }

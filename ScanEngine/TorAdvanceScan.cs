@@ -8,7 +8,6 @@ namespace TorAdvScan
 {
     public class TorScan : INetwork, IDisposable
     {
-        public string FilePath { get; set; }
         public IPAddress Host { get; set; }
         public int Port { get; set; }
         public string Password { get; set; } = string.Empty;
@@ -24,16 +23,21 @@ namespace TorAdvScan
             401, 403, 406, 429, 451, 503
         };
 
-        public TorScan(string filePath)
+        public TorScan(string target, string password, IPAddress host, int port, int timeout, string wordlistPath, string jsonFilePath)
         {
-            FilePath = filePath;
 
             var handler = new SocketsHttpHandler
             {
                 Proxy = new WebProxy("socks5://127.0.0.1:9050"),
                 UseProxy = true
             };
-
+            Target = target;
+            Timeout = timeout;
+            Port = port;
+            Host = host;
+            JsonFilePath = jsonFilePath;
+            WordlistPath = wordlistPath;
+            Password = password;
             _client = new HttpClient(handler);
         }
 
@@ -67,7 +71,7 @@ namespace TorAdvScan
 
         public async Task<string[]> ProcessWordlist()
         {
-            return await File.ReadAllLinesAsync(FilePath);
+            return await File.ReadAllLinesAsync(WordlistPath);
         }
 
         public async Task<ScanOutput> SendAsync(string domain)
@@ -104,53 +108,6 @@ namespace TorAdvScan
 
             return scan;
         }
-
-        public async Task<MainScanOutput> ExecuteScan()
-        {
-            string[] wordlist = await ProcessWordlist();
-
-            using var semaphore = new SemaphoreSlim(10);
-            MainScanOutput mainScanOutput = new MainScanOutput();
-            object resultLock = new object();
-
-            var tasks = wordlist.Select(async domain =>
-            {
-                await semaphore.WaitAsync();
-
-                try
-                {
-                    var result = await SendAsync(domain);
-
-                    lock (resultLock)
-                    {
-                        mainScanOutput.Result.Add(result);
-                    }
-
-                    if (IsBlocked(result.StatusCode))
-                    {
-                        await _rotateLock.WaitAsync();
-                        try
-                        {
-                            await Rotate();
-                            await Task.Delay(10000);
-                        }
-                        finally
-                        {
-                            _rotateLock.Release();
-                        }
-                    }
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
-
-            await Task.WhenAll(tasks);
-
-            return mainScanOutput;
-        }
-
         public bool IsBlocked(int statusCode)
         {
             return BlockedCodes.Contains(statusCode);

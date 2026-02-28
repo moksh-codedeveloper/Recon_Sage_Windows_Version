@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Numerics;
 using ResoModel;
 
 namespace ResoParser
@@ -29,7 +27,7 @@ namespace ResoParser
             }
 
             // REQUIRED KEYS CHECK
-            string[] requiredKeys = { "target", "concurrency", "timeout", "json_file_path", "wordlist_path", "tor_scan", "normal_scan", "adaptive_switch"};
+            string[] requiredKeys = { "target", "concurrency", "timeout", "json_file_path", "wordlist_path"};
 
             foreach (var key in requiredKeys)
             {
@@ -47,12 +45,6 @@ namespace ResoParser
     
             if (!int.TryParse(data["timeout"], out int timeout) || timeout <= 0)
                 throw new Exception("Invalid timeout value.");
-            if(!bool.TryParse(data["tor_scan"], out bool tor_scan))
-                throw new Exception("ERROR in parsing the values of tor_scan in bool please pass true or false for if you want it or not");
-            if(!bool.TryParse(data["normal_scan"], out bool normal_scan))
-                throw new Exception("ERROR in parsing the values of normal_scan in bool please pass true or false for if you want it or not");
-            if(!bool.TryParse(data["adaptive_switch"], out bool adaptive_switch))
-                throw new Exception("ERROR in parsing the values adaptive_switch in bool please pass true or false for if you want it or not");
 
             // FILE EXTENSION CHECKS
             if (!data["wordlist_path"].EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
@@ -71,10 +63,7 @@ namespace ResoParser
                 Concurrency = int.Parse(data["concurrency"]),
                 Timeout = int.Parse(data["timeout"]),
                 JsonFilePath = data["json_file_path"],
-                WordlistPath = data["wordlist_path"],
-                TorScan = bool.Parse(data["tor_scan"]),
-                NormalScan = bool.Parse(data["normal_scan"]),
-                AdaptiveSwitch = bool.Parse(data["adaptive_switch"])
+                WordlistPath = data["wordlist_path"]
             };
         }
     }

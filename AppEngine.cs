@@ -14,9 +14,6 @@ namespace AppEngine
         public int Timeout { set; get; }
         public string JsonFilePath { set; get; } = string.Empty;
         public string WordlistPath { set; get; } = string.Empty;
-        public bool TorScan{set;get;}
-        public bool NormalScan{set;get;}
-        public bool AdaptiveSwitch{set;get;}
 
         public async Task RunScan(string[] args)
         {
@@ -40,9 +37,6 @@ namespace AppEngine
                     Timeout = parserToDict.Timeout;
                     JsonFilePath = parserToDict.JsonFilePath;
                     WordlistPath = parserToDict.WordlistPath;
-                    TorScan = parserToDict.TorScan;
-                    NormalScan = parserToDict.NormalScan;
-                    AdaptiveSwitch = parserToDict.AdaptiveSwitch;
                     break;
                 case "--args":
                     var cliEngine = new CLIMainEngine().ProcessCLiArgs(args);
@@ -51,14 +45,11 @@ namespace AppEngine
                     Timeout = cliEngine.Timeout;
                     JsonFilePath = cliEngine.JsonFilePath;
                     WordlistPath = cliEngine.WordlistPath;
-                    TorScan = cliEngine.TorScan;
-                    NormalScan = cliEngine.NormalScan;
-                    AdaptiveSwitch = cliEngine.AdaptiveSwitch;
                     break;
                 default:
                     throw new Exception("Unknown argument type. Use --config-file or --args.");
             }
-            Scanner scanner = new Scanner(Target, Concurrency, Timeout, WordlistPath, tor_scan:TorScan, normal_scan:NormalScan, adaptive_switch:AdaptiveSwitch);
+            Scanner scanner = new Scanner(Target, Concurrency, Timeout, WordlistPath);
             MainScanOutput mainScan = await scanner.ExecuteScan();
             PrintToConsole(mainScan);
             await WriteToJsonAsync(mainScan, JsonFilePath);

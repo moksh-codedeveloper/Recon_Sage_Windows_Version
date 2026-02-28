@@ -50,7 +50,7 @@ namespace TcpCliWrapper
                         break;
                     case "--wordlist":
                         string wordlistpath = args[++i];
-                        if (!wordlistpath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(wordlistpath))
+                        if (!wordlistpath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(wordlistpath))
                             throw new Exception("You serriously don't know what the wordlist is huhh go home kid and remove this tool seriously");
                         WordlistPath = wordlistpath;
                         break;

@@ -10,9 +10,6 @@ namespace ScanModels.CLIVersion
         public int Timeout { set; get; }
         public string JsonFilePath { set; get; } = string.Empty;
         public string  WordlistPath{set; get;} = string.Empty;
-        public bool TorScan{set;get;}
-        public bool NormalScan{set;get;}
-        public bool AdaptiveSwitch{set;get;}
         public CLIMainEngine ProcessCLiArgs(string[] args)
         {
             CLIMainEngine options = new CLIMainEngine();
@@ -37,25 +34,16 @@ namespace ScanModels.CLIVersion
                         break;
 
                     case "--json":
-                        options.JsonFilePath = args[++i];
+                        string jsonFilePath = args[++i];
+                        if(!jsonFilePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                            throw new Exception("The file should be the json strictly not the  other  files");
+                        options.JsonFilePath = jsonFilePath;
                         break;
                     case "--wordlist":
-                        options.WordlistPath = args[++i];
-                        break;
-                    case "--tor-scan":
-                        if(!bool.TryParse(args[++i], out bool tor_scan))
-                            throw new Exception("Invalid only the boolean values for tor_scan");
-                        options.TorScan = tor_scan;
-                        break;
-                    case "--normal-scan":
-                        if(!bool.TryParse(args[++i], out bool normal_scan))
-                            throw new Exception("Invalid only the boolean values for normal_scan");
-                        options.NormalScan = normal_scan;
-                        break;
-                    case "--adaptive-scan":
-                        if(!bool.TryParse(args[++i], out bool adaptive_switch))
-                            throw new Exception("Invalid only the boolean values for adaptive_switch");
-                        options.AdaptiveSwitch = adaptive_switch;
+                        string wordlistFilePath = args[++i];
+                        if(!wordlistFilePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                            throw new Exception("The file should be text strictly not the  other  files");
+                        options.WordlistPath = wordlistFilePath;
                         break;
                 }
             }
